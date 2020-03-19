@@ -1,0 +1,67 @@
+<html>
+<head>
+	<title>Covid19 Graphs</title>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			width: 100vw;
+			height: 100vh;
+		}
+
+		#app {
+			width: 100vw;
+			height: 100vh;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="app">
+		<canvas id="covid19canvas"></canvas>
+	</div>
+
+	<script
+	  src="https://code.jquery.com/jquery-3.4.1.min.js"
+	  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+	  crossorigin="anonymous"></script>
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+	<script>
+		$.getJSON("covid19.json", function (json) {
+			ds = [];
+		    for (let [key, value] of Object.entries(json)) {
+			  color = dynamicColors();
+			  if (key != 'Total') {
+				  ds.push({
+				  	label: key,
+				  	backgroundColor: color,
+			    	borderColor: color,
+			    	hidden: true,
+				  	data: [value["Total Cases"], value["New Cases"], value["Total Deaths"], value["New Deaths"], value["Total Recovered"], value["Active Cases"], value["Critical Cases"]]
+				  })
+			  }
+			}
+			console.log(ds)
+
+		  var data = {
+		    labels: ['Total Cases', 'New Cases', 'Total Deaths', 'New Deaths', 'Total Recovered', 'Active Cases', 'Critical Cases'],
+		    datasets: ds
+		  };
+
+		  var ctx = document.getElementById("covid19canvas").getContext("2d");
+		  ctx.canvas.width = 1000;
+		  ctx.canvas.height = 800;
+
+		  var myChart = new Chart(ctx, {type: 'radar', data: data});
+		});
+
+		var dynamicColors = function() {
+		    var r = Math.floor(Math.random() * 255);
+		    var g = Math.floor(Math.random() * 255);
+		    var b = Math.floor(Math.random() * 255);
+		    return "rgba(" + r + "," + g + "," + b + ",0.2)";
+		}
+	</script>
+</body>
+</html>

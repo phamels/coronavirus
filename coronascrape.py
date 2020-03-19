@@ -22,11 +22,12 @@ def switch_keys(keys):
         "TotalCases": "Total Cases",
         "NewCases": "New Cases",
         "TotalDeaths": "Total Deaths",
+        "NewDeaths": "New Deaths",
         "TotalRecovered": "Total Recovered",
         "ActiveCases": "Active Cases",
-        "Serious,Critical": "Critical Cases",
+        "Serious,Critical": "Critical Cases"
     }
-    return switcher.get(keys, "Invalid Key")
+    return switcher.get(keys, keys)
 
 
 for t in tr_elements[0]:
@@ -47,9 +48,10 @@ for j in range(1, len(tr_elements)):
         if not isinstance(t, lh.HtmlComment):
             data = t.text_content().strip()
             if i == 0:
-                country = data
+                country = data.replace(':','')
                 ret[country] = {}
             else:
+                data = data.replace(':', '')
                 data = data.replace(',', '')
                 try:
                     data = int(data)
@@ -67,5 +69,6 @@ for j in range(1, len(tr_elements)):
             i += 1
     ret_data.update(ret)
 
+del ret_data["Country,Other"]
 with open(output_file, 'w') as f:
     f.write(json.dumps(ret_data))
