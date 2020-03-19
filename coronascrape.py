@@ -4,7 +4,7 @@ import unidecode
 import json
 
 url = 'https://www.worldometers.info/coronavirus/'
-output_file = 'covid19.json'
+output_file = 'html/covid19.json'
 
 page = requests.get(url)
 doc = lh.fromstring(page.content)
@@ -37,7 +37,7 @@ for t in tr_elements[0]:
 
 for j in range(1, len(tr_elements)):
     T = tr_elements[j]
-    if len(T) != 12:
+    if len(T) != 9:
         break
     i = 0
     ret = {}
