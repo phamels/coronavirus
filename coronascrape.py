@@ -38,7 +38,7 @@ for t in tr_elements[0]:
 
 for j in range(1, len(tr_elements)):
     T = tr_elements[j]
-    if len(T) != 9:
+    if len(T) != 10:
         break
     i = 0
     ret = {}
@@ -48,7 +48,7 @@ for j in range(1, len(tr_elements)):
         if not isinstance(t, lh.HtmlComment):
             data = t.text_content().strip()
             if i == 0:
-                country = data.replace(':','')
+                country = data.replace(':', '')
                 ret[country] = {}
             else:
                 data = data.replace(':', '')
@@ -70,5 +70,6 @@ for j in range(1, len(tr_elements)):
     ret_data.update(ret)
 
 del ret_data["Country,Other"]
+print(ret_data)
 with open(output_file, 'w') as f:
     f.write(json.dumps(ret_data))
