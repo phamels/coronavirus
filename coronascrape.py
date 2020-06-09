@@ -1,75 +1,33 @@
 import requests
-import lxml.html as lh
-import unidecode
-import json
+from bs4 import BeautifulSoup
+import pandas as pd
 
 url = 'https://www.worldometers.info/coronavirus/'
 output_file = 'html/covid19.json'
 
 page = requests.get(url)
-doc = lh.fromstring(page.content)
+soup = BeautifulSoup(page.content, 'html.parser')
 
-tr_elements = doc.xpath('//tr')
+table = soup.find('table', attrs={'id': 'main_table_countries_today'})
+table_rows = table.find_all('tr')
+table_head = table.find_all('thead')
 
-col = []
-i = 0
-ret_data = {}
+data_list = []
+col_list = []
 
+for tr in table_head:
+    th = tr.find_all('th')
+    th_row = [tr.text for tr in th]
+    col_list = th_row
 
-def switch_keys(keys):
-    switcher = {
-        "Country,Other": "Country",
-        "TotalCases": "Total Cases",
-        "NewCases": "New Cases",
-        "TotalDeaths": "Total Deaths",
-        "NewDeaths": "New Deaths",
-        "TotalRecovered": "Total Recovered",
-        "ActiveCases": "Active Cases",
-        "Serious,Critical": "Critical Cases"
-    }
-    return switcher.get(keys, keys)
+for tr in table_rows:
+    td = tr.find_all('td')
+    row = [tr.text for tr in td]
+    data_list.append(row)
 
+df = pd.DataFrame(data_list, columns=col_list)
+df.drop(df.index[:8], inplace=True)
 
-for t in tr_elements[0]:
-    i += 1
-    if not isinstance(t, lh.HtmlComment):
-        name = t.text_content()
-        col.append((name, []))
-
-for j in range(1, len(tr_elements)):
-    T = tr_elements[j]
-    if len(T) != 10:
-        break
-    i = 0
-    ret = {}
-    country = None
-
-    for t in T.iterchildren():
-        if not isinstance(t, lh.HtmlComment):
-            data = t.text_content().strip()
-            if i == 0:
-                country = data.replace(':', '')
-                ret[country] = {}
-            else:
-                data = data.replace(':', '')
-                data = data.replace(',', '')
-                try:
-                    data = int(data)
-                except:
-                    pass
-                try:
-                    data = float(data)
-                except:
-                    pass
-                if data == "":
-                    data = 0.0
-            unidecode.unidecode(col[i][0])
-            ret[country][switch_keys(unidecode.unidecode(col[i][0]))] = data
-            col[i][1].append(data)
-            i += 1
-    ret_data.update(ret)
-
-del ret_data["Country,Other"]
-print(ret_data)
-with open(output_file, 'w') as f:
-    f.write(json.dumps(ret_data))
+df = df.replace('\n', '', regex=True)
+with open('html/covid19.json', 'w') as json_file:
+    json_file.write(df.to_json(orient='records'))
